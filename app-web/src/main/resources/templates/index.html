@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catálogo de Videojuegos</title>
+    <style>
+        :root { --fondo:#0f1222; --panel:#1a1e35; --texto:#e8e9f3; --tenue:#9aa0c3; --acento:#7c5cff; --ok:#2fbf71; --mal:#ff5c7a; }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--fondo); color:var(--texto); }
+        header { padding:24px 32px; border-bottom:1px solid #2a2f52; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+        h1 { margin:0; font-size:1.6rem; }
+        .entorno { padding:4px 12px; border-radius:999px; font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+        .entorno.produccion { background:var(--ok); color:#06210f; }
+        .entorno.desarrollo { background:#f4c430; color:#2b2100; }
+        main { padding:24px 32px; display:grid; grid-template-columns: 300px 1fr; gap:32px; }
+        @media (max-width: 800px) { main { grid-template-columns: 1fr; padding:16px; } header { padding:16px; } }
+        .panel { background:var(--panel); border-radius:12px; padding:20px; }
+        label { display:block; font-size:.85rem; color:var(--tenue); margin:12px 0 4px; }
+        input, select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid #2f355e; background:#11142a; color:var(--texto); }
+        button { margin-top:16px; width:100%; padding:10px; border:0; border-radius:8px; background:var(--acento); color:white; font-weight:600; cursor:pointer; }
+        .filtros { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+        .filtros a { padding:6px 12px; border-radius:999px; background:var(--panel); color:var(--texto); text-decoration:none; font-size:.85rem; }
+        .filtros a.activo { background:var(--acento); }
+        .grilla { display:grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap:16px; }
+        .juego { background:var(--panel); border-radius:12px; overflow:hidden; }
+        .juego img, .juego .sin-imagen { width:100%; aspect-ratio:3/4; object-fit:cover; display:block; background:#2a2f52; }
+        .juego .sin-imagen { display:flex; align-items:center; justify-content:center; color:var(--tenue); font-size:2rem; }
+        .juego .info { padding:10px 12px; }
+        .juego h3 { margin:0 0 4px; font-size:.95rem; }
+        .juego p { margin:0; font-size:.8rem; color:var(--tenue); }
+        .aviso { padding:10px 14px; border-radius:8px; margin-bottom:16px; }
+        .aviso.ok { background:rgba(47,191,113,.15); border:1px solid var(--ok); }
+        .aviso.error { background:rgba(255,92,122,.15); border:1px solid var(--mal); }
+        footer { padding:16px 32px; color:var(--tenue); font-size:.8rem; border-top:1px solid #2a2f52; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>🎮 Catálogo de Videojuegos</h1>
+    <span class="entorno" th:classappend="${entorno}" th:text="${entorno}">desarrollo</span>
+</header>
+
+<main>
+    <section class="panel">
+        <h2 style="margin-top:0;font-size:1.1rem">Registrar juego</h2>
+        <form th:action="@{/juegos}" method="post">
+            <label for="titulo">Título *</label>
+            <input id="titulo" name="titulo" required maxlength="100">
+
+            <label for="genero">Género *</label>
+            <select id="genero" name="genero" required>
+                <option th:each="g : ${generos}" th:value="${g.name()}" th:text="${g.nombre}">Acción</option>
+            </select>
+
+            <label for="anio">Año</label>
+            <input id="anio" name="anio" type="number" min="1950">
+
+            <label for="plataforma">Plataforma</label>
+            <input id="plataforma" name="plataforma" maxlength="60">
+
+            <label for="imagenUrl">URL de la imagen</label>
+            <input id="imagenUrl" name="imagenUrl" type="url" placeholder="https://...">
+
+            <button type="submit">Registrar</button>
+        </form>
+    </section>
+
+    <section>
+        <div class="aviso ok" th:if="${mensaje}" th:text="${mensaje}"></div>
+        <div class="aviso error" th:if="${error}" th:text="${error}"></div>
+
+        <nav class="filtros">
+            <a th:href="@{/}" th:classappend="${seleccionado == null} ? 'activo'">Todos</a>
+            <a th:each="g : ${generos}"
+               th:href="@{/(genero=${g.name()})}"
+               th:classappend="${seleccionado == g} ? 'activo'"
+               th:text="${g.nombre + (resumen.get(g) != null ? ' (' + resumen.get(g) + ')' : '')}">Acción</a>
+        </nav>
+
+        <p th:if="${#lists.isEmpty(juegos)}" style="color:var(--tenue)">No hay juegos para mostrar.</p>
+
+        <div class="grilla">
+            <article class="juego" th:each="j : ${juegos}">
+                <img th:if="${j.imagenUrl}" th:src="${j.imagenUrl}" th:alt="${j.titulo}" loading="lazy">
+                <div class="sin-imagen" th:unless="${j.imagenUrl}">🕹️</div>
+                <div class="info">
+                    <h3 th:text="${j.titulo}">Título</h3>
+                    <p>
+                        <span th:text="${j.genero.nombre}">Género</span>
+                        <span th:if="${j.anio}" th:text="' · ' + ${j.anio}"></span>
+                        <span th:if="${j.plataforma}" th:text="' · ' + ${j.plataforma}"></span>
+                    </p>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<footer>
+    Versión <strong th:text="${version}">dev</strong> · Programación Avanzada 2026 · Entregable 4
+</footer>
+</body>
+</html>

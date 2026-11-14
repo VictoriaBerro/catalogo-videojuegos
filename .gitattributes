@@ -1,0 +1,3 @@
+# Los scripts se ejecutan dentro del contenedor Linux de Jenkins: siempre con fin de línea LF
+*.sh text eol=lf
+Jenkinsfile text eol=lf

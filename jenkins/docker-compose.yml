@@ -1,0 +1,25 @@
+# Levanta Jenkins en http://localhost:8090
+#   docker compose up -d --build      (desde la carpeta jenkins/)
+#
+# Jenkins usa el Docker del equipo (socket montado) para construir la imagen de la app
+# y levantar el contenedor de producción "catalogo-prod" en http://localhost:8081.
+services:
+  jenkins:
+    build: .
+    container_name: jenkins
+    user: root            # necesario para usar /var/run/docker.sock (ambiente de práctica)
+    ports:
+      - "8090:8080"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - cicd
+    restart: unless-stopped
+
+networks:
+  cicd:
+    name: cicd
+
+volumes:
+  jenkins_home:
