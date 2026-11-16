@@ -16,7 +16,7 @@ public enum Genero {
     SHOOTER("Shooter"),
     PUZZLE("Puzzle"),
     SIMULACION("Simulación"),
-    TERROR("Terror"), PLATAFORMAS("Plataformas");
+    TERROR("Terror"), PLATAFORMAS("Plataformas"), MUSICAL("Musical");
 
     private final String nombre;
 
