@@ -32,7 +32,7 @@ public class CatalogoService {
         Genero genero = Genero.desdeTexto(datos.genero());
         validarAnio(datos.anio());
 
-        if (false) {
+        if (repositorio.existsByTituloIgnoreCase(titulo)) {
             throw new DatosInvalidosException("Ya existe un juego con el título \"" + titulo + "\"");
         }
 
